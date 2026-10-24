@@ -1,0 +1,50 @@
+Figma → PhotoCraft 1.1.0（Build 3）
+
+安装与配对
+1. 需要 Apple Silicon Mac、macOS 11 或更高版本、Figma 桌面版，并已安装 PhotoCraft。
+2. 解压对应的 macOS 发布包，打开 Figma PhotoCraft Setup.app 安装本机桥接，复制安装完成后显示的配对码。
+   发布安装器包含编译好的组件，用户不需要 Python 或 Xcode。
+3. 安装 Figma Community 插件「在 PhotoCraft 中编辑」。尚未上架时，可解压插件发布包，
+   在 Figma 的 Plugins → Development → Import plugin from manifest 中选择其 manifest.json；
+   安装器也会把同一通用插件放到 ~/Library/Application Support/Figma-PhotoCraft/plugin/。
+4. 选中单个含图片填充的图层，运行「在 PhotoCraft 中编辑」，首次粘贴 64 位十六进制配对码并连接。
+   配对码保存在 Figma 的本地 clientStorage，不写入设计文档或公开插件代码；不要公开配对码。
+   再次打开桥接应用可查看或复制同一配对码。桥接固定使用 http://localhost:47836。
+
+使用
+1. 组内图片需选择图片图层本身；单个图层需只有一个可见图片填充。
+2. 运行「在 PhotoCraft 中编辑」，在 PhotoCraft 打开的 PSD 工作工程中编辑。
+3. 按 Command + S 直接保存。插件运行期间，合成图会自动更新原 Figma 图层，
+   无需手动导出、重新导入或切换当前选择。图片裁切、缩放、透明度、混合及节点位置、尺寸、旋转保留。
+4. 可用 Figma 的 Command + Z 撤销图片更新。撤销、替换图片或删除图层后，旧关联停止覆盖；
+   再次选中图片运行插件可建立新关联。
+Figma 同一文件一次运行一个插件，运行其他插件会中断自动回传。
+公开版只使用官方公开 Plugin API，不使用私有 fileKey；每次插件运行创建独立关联。
+关闭插件或文件、退出 Figma 后不会自动修改该文档；再次运行需重新发送图片，旧 PSD 仍保留。
+
+限制
+支持 PNG、JPEG、GIF 图片填充；GIF 按静态位图处理。原始文件和回传 PNG 上限各为 64 MiB。
+PhotoCraft 图层、蒙版和效果合成为一张图片回传；请保持「最大化 PSD 兼容性」启用。
+使用 RGB 8/16 位合成图，支持 raw、RLE、ZIP、ZIP 预测，保留 RGB ICC profile 并恢复透明度。
+32 位、非 RGB、PSB 或缺少有效合成图时不回传。
+请直接保存打开的 working.psd；「另存为」的新路径不在原关联中。
+PhotoCraft 改变画布尺寸时，仍保留 Figma 节点尺寸，视觉裁切可能相应变化。
+Figma 图片 API 的大小限制继续适用，不能保证所有大尺寸图像均可导入。
+本机端口已被其他程序占用或旧开发版使用其他端口时，安装器会停止并保留原安装。
+本插件不修改 Figma 原生菜单或应用资源；未来官方接口或 PSD 行为变化仍需重新核验。
+
+本机组件与数据
+桥接应用：~/Applications/Figma PhotoCraft Bridge.app
+启动项：~/Library/LaunchAgents/local.figma.photocraft.bridge.plist
+配置和工作工程：~/Library/Application Support/Figma-PhotoCraft/
+桥接仅监听 127.0.0.1，以每次安装保留的随机令牌认证；图片处理不上传远程编辑服务。
+桥接独立于 XD，不需要辅助功能授权。工作工程保留为标准 PSD，不依赖 PhotoCraft 原生工程版本。
+重复安装保留配置与工作工程；通用插件目录不包含本机令牌，可以与公开发布包核对。
+
+源码安装与卸载
+源码安装需要 Python 3 和 Xcode 命令行工具：在此目录运行 python3 install.py。
+编译使用相邻 shared/PSD.swift，不要求相邻存在另一套 XD 源码。
+源码卸载：python3 uninstall.py。它保留 projects 下的工作图片和 PSD，不影响 XD 桥接。
+手动卸载可先运行 launchctl bootout gui/$(id -u) "$HOME/Library/LaunchAgents/local.figma.photocraft.bridge.plist"，
+再删除上述桥接应用、对应启动项和本地 plugin 目录；工作工程需自行决定是否删除。
+在 Figma 的插件管理中移除对应插件。删除桥接配置并重新安装会生成新配对码，旧配对失效。
