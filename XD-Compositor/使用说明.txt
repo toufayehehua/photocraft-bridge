@@ -1,0 +1,54 @@
+XD → PhotoCraft 1.3.0（Build 5）
+
+安装与配对
+1. 需要 Apple Silicon Mac、macOS 26 或更高版本、XD 36 或更高版本，并已安装 PhotoCraft。
+2. 解压对应的 macOS 发布包，打开 XD PhotoCraft Setup.app 安装本机桥接，复制安装完成后显示的配对码。
+   发布安装器包含编译好的组件，用户不需要 Python 或 Xcode。
+3. 安装发布包中的 .xdx 插件。安装器也会把同一通用插件放入用户 XD develop 目录。
+   如 XD 已经运行，重启或重新加载插件，使菜单与快捷键生效。
+4. 在「系统设置 → 隐私与安全 → 辅助功能」中允许
+   ~/Applications/XD Compositor Bridge.app。系统身份验证由用户完成。
+5. 选中一个图片填充对象，运行「插件 → PhotoCraft → 在 PhotoCraft 中编辑」或按 Command + P。
+   首次运行粘贴配对码，格式为 port:64位十六进制令牌；验证通过后直接打开图片工程。
+   配对码保存在 XD 插件的用户数据目录，不在 .xdx 或公开源码中；不要公开配对码。
+   需要重新查看配对码时，可再次运行同一安装器。尚未配对时，「更新回 XD」保持静默。
+
+使用
+1. 在 XD 中选中单个图片对象；若选中的是组，进入组并选择图片本身。
+2. 运行「在 PhotoCraft 中编辑」，在 PhotoCraft 打开的 PSD 工作工程中编辑。
+3. 按 Command + S 直接保存。桥接读取 PSD 合成图并自动触发 XD 更新对应图片。
+   无须手动导出或重新选择原对象；回传时可能短暂切换到 XD，再返回之前的应用。
+4. 可用 XD 的 Command + Z 撤销图片更新。撤销后需重新发送图片建立关联。
+   同一对象再次发送会建立新关联，旧 PSD 保留，但不再自动回传。
+5. 「更新回 XD」或 Control + Option + Command + U 可应用待回传结果；
+   已配对且没有待回传结果时，也可选择手动导出的 PNG、JPEG 或 GIF。
+
+限制
+支持单个图片填充对象，原图为 PNG、JPEG 或 GIF；GIF 按静态位图处理。
+PhotoCraft 内的图层、蒙版和效果合成为一张图片回传，保留 XD 对象位置、尺寸、旋转、形状和缩放方式。
+XD 中手动调整过的内部裁切位置可能需要重新调整。
+请保持 PhotoCraft 的「最大化 PSD 兼容性」启用，使用 RGB 8/16 位 PSD 合成图。
+支持 raw、RLE、ZIP、ZIP 预测；32 位、非 RGB、PSB 或缺少有效合成图时不更新原图。
+请直接保存此次打开的 PSD；「另存为」产生的新路径不在关联中。
+XD 文档需保持打开；图片已被替换或对象已删除时停止覆盖，重新发送可建立新关联。
+缺少控制权限、XD 有弹窗或窗口暂时不可用时，已生成结果保留，等待可用时重试。
+PhotoCraft 通过应用标识查找，PSD 不依赖其原生工程格式；未来插件接口或 PSD 行为变化仍需重新核验。
+
+本机组件与数据
+桥接应用：~/Applications/XD Compositor Bridge.app
+启动项：~/Library/LaunchAgents/local.xd.compositor.bridge.plist
+桥接配置：~/Library/Application Support/XD-Compositor/
+工作图片、PSD 和最近回传 PNG：XD 管理的 CmptXd01 插件数据目录中的 compositor-edit-* 文件夹。
+桥接只监听 127.0.0.1，以每次安装保留的随机令牌认证；图片处理不上传远程服务。
+旧 .comp 工程仍使用 Compositor v1.4.8 的 MIT 渲染代码；源码出处和完整许可随源代码和含该组件的应用提供。
+公开安装器不修改 XD 或 PhotoCraft 应用包，不改变 XD 原生「在 Photoshop 中编辑」右键菜单。
+context-menu 为仅适配特定 XD 版本的可选开发工具，不在默认安装流程中。
+
+源码安装与卸载
+源码安装需要 Python 3 和 Xcode 26 命令行工具：在此目录运行 python3 install.py。
+也可用 python3 install.py --app '/路径/XD Compositor Bridge.app' 安装同版本预构建组件。
+源码编译仅使用相邻 shared/PSD.swift；显式运行 python3 install.py --pairing-code 可查看现有配对码。
+源码卸载：python3 uninstall.py。它保留工作图片与 PSD，不还原另行安装的原生右键补丁。
+手动卸载可先运行 launchctl bootout gui/$(id -u) "$HOME/Library/LaunchAgents/local.xd.compositor.bridge.plist"，
+再删除上述桥接应用、对应启动项和用户 XD develop/Compositor 插件；工作工程需自行决定是否删除。
+在 XD 管理界面移除另行安装的 .xdx 插件，并在系统设置中移除桥接的辅助功能授权。
