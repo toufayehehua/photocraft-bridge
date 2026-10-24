@@ -1,0 +1,29 @@
+{
+  "manifestVersion": 4,
+  "id": "CmptXd01",
+  "name": "PhotoCraft",
+  "version": "1.3.0",
+  "main": "main.js",
+  "host": {
+    "app": "XD",
+    "minVersion": "36.0"
+  },
+  "entrypoints": [
+    {
+      "type": "command",
+      "id": "edit",
+      "label": "在 PhotoCraft 中编辑",
+      "shortcut": {
+        "mac": "Cmd+P"
+      }
+    },
+    {
+      "type": "command",
+      "id": "update",
+      "label": "更新回 XD",
+      "shortcut": {
+        "mac": "Cmd+Ctrl+Opt+U"
+      }
+    }
+  ]
+}
