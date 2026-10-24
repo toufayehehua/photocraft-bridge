@@ -7,5 +7,7 @@
   "source_url": "https://github.com/toufayehehua/photocraft-bridge",
   "privacy_url": "https://github.com/toufayehehua/photocraft-bridge/blob/main/PRIVACY.md",
   "download_url": "https://github.com/toufayehehua/photocraft-bridge/releases",
+  "community_url": "https://www.figma.com/community/plugin/1695793882852666354",
+  "community_status": "submitted_for_review",
   "review_notes": "The companion runs only on loopback, creates/reads local PSD files, and launches PhotoCraft. All Figma document changes use the official Plugin API. The companion does not inject into, modify, or automate Figma Web/Desktop. Local HTTP uses a per-installation pairing token. No analytics or remote image processing are implemented. The public plugin does not use private Figma APIs."
 }
