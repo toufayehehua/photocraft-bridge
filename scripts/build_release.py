@@ -167,48 +167,53 @@ def package_plugin(host, output):
             raise ValueError("Plugin archive verification failed")
 
 
-def notary_command(profile, action, *arguments):
+def notary_command(profile, action, *arguments, log_dir=None):
     result = subprocess.run(["xcrun", "notarytool", action, *map(str, arguments),
                              "--keychain-profile", profile, "--output-format", "json"],
                             capture_output=True, text=True)
+    if log_dir is not None:
+        log_dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+        os.chmod(log_dir, 0o700)
+        stem = action + "-" + uuid.uuid4().hex
+        for suffix, content in (("stdout", result.stdout), ("stderr", result.stderr)):
+            descriptor = os.open(log_dir / (stem + "." + suffix), os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(descriptor, "w") as stream:
+                stream.write(content)
     for stream in (result.stdout, result.stderr):
         try:
             payload = json.loads(stream)
             if isinstance(payload, dict):
+                payload["_exitCode"] = result.returncode
                 return payload
         except ValueError:
             pass
-    return {}
+    return {"_exitCode": result.returncode}
 
 
-def submit_notarization(host, archive, profile):
-    history = notary_command(profile, "history").get("history")
-    if not isinstance(history, list):
-        raise ValueError("Cannot read notarization history before submitting " + host)
-    previous = {item.get("id") for item in history}
-    submission_id = notary_command(profile, "submit", archive).get("id")
-    if not submission_id:
-        # An upload can succeed even if the client fails afterwards. Recover only
-        # an unambiguous new history entry; final stapling still verifies the code.
-        candidates = [item.get("id") for item in notary_command(profile, "history").get("history", [])
-                      if item.get("name") == archive.name and item.get("id") not in previous]
-        if len(candidates) == 1:
-            submission_id = candidates[0]
-    if not submission_id:
-        raise ValueError("Notary service did not return a submission ID for " + host)
+def submit_notarization(host, archive, profile, log_dir=None):
+    result = notary_command(profile, "submit", archive, "--no-s3-acceleration", log_dir=log_dir)
+    # Creating a submission precedes the upload. An ID in history alone does not
+    # prove the archive reached Apple; only a successful submit may be resumed.
+    if result.get("_exitCode") != 0:
+        raise ValueError("Notary upload did not complete for " + host +
+                         " (exit " + str(result.get("_exitCode")) + ")")
+    submission_id = result.get("id")
+    if not isinstance(submission_id, str) or not re.fullmatch(r"[a-fA-F0-9]{8}(?:-[a-fA-F0-9]{4}){3}-[a-fA-F0-9]{12}", submission_id):
+        raise ValueError("Notary upload returned no valid submission ID for " + host)
     uuid.UUID(submission_id)
-    print(json.dumps({"host": host, "notarizationId": submission_id, "status": "Submitted"}), flush=True)
+    print(json.dumps({"host": host, "notarizationId": submission_id, "status": "Uploaded"}), flush=True)
     return submission_id
 
 
-def notarize(host, profile, submission_id):
+def notarize(host, profile, submission_id, log_dir=None):
     uuid.UUID(submission_id)
     print(json.dumps({"host": host, "notarizationId": submission_id, "status": "Waiting"}), flush=True)
     for _ in range(12):
-        result = notary_command(profile, "wait", submission_id, "--timeout", "10m")
-        if result.get("status") not in ("Accepted", "Invalid", "Rejected"):
-            result = notary_command(profile, "info", submission_id)
-        status = result.get("status")
+        result = notary_command(profile, "wait", submission_id, "--timeout", "10m", log_dir=log_dir)
+        if not (result.get("_exitCode") == 0 and result.get("id") == submission_id and
+                result.get("status") in ("Accepted", "Invalid", "Rejected")):
+            result = notary_command(profile, "info", submission_id, log_dir=log_dir)
+        status = result.get("status") if result.get("_exitCode") == 0 and result.get("id") == submission_id else None
         if status == "Accepted":
             print(json.dumps({"host": host, "notarizationId": submission_id, "status": status}), flush=True)
             return {"id": submission_id, "status": status}
@@ -260,12 +265,14 @@ def build(args):
             output = artifacts / ("PhotoCraft-Bridge-" + label + "-" + info["version"] + "-macOS-arm64.zip")
             zip_app(app, output)
             if args.notary_profile:
-                submission_id = resumes.get(host) or submit_notarization(host, output, args.notary_profile)
+                submission_id = resumes.get(host) or submit_notarization(host, output, args.notary_profile,
+                                                                         log_dir=staging / "notary-logs")
                 submissions[host] = {"id": submission_id, "status": "In Progress"}
                 applications[host] = (app, output)
         # Queue both hosts before waiting so Apple's independent scans can run in parallel.
         for host, (app, output) in applications.items():
-            submissions[host] = notarize(host, args.notary_profile, submissions[host]["id"])
+            submissions[host] = notarize(host, args.notary_profile, submissions[host]["id"],
+                                         log_dir=staging / "notary-logs")
             run(["xcrun", "stapler", "staple", app])
             run(["xcrun", "stapler", "validate", app])
             zip_app(app, output)
@@ -291,7 +298,7 @@ if __name__ == "__main__":
     parser.add_argument("--identity", help="Developer ID Application signing identity")
     parser.add_argument("--notary-profile", help="Existing notarytool keychain profile")
     parser.add_argument("--resume-notarization", action="append", default=[], metavar="HOST=ID",
-                        help="Resume an existing figma or xd submission; stapling still verifies the rebuilt code matches")
+                        help="Resume a confirmed uploaded figma or xd submission; stapling verifies the rebuilt code matches")
     parser.add_argument("--development", action="store_true", help="Allow the temporary local Figma ID and unfilled download link")
     parser.add_argument("--ad-hoc", action="store_true", help="Sign a local development build without Developer ID")
     parser.add_argument("--validate-only", action="store_true", help="Check release sources without compiling or writing artifacts")
