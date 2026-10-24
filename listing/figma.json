@@ -1,0 +1,11 @@
+{
+  "name": "在 PhotoCraft 中编辑",
+  "tagline": "Edit image fills in PhotoCraft and sync saved changes back to Figma.",
+  "pricing": "free",
+  "description": "选中 Figma 中的单个图片填充，在 PhotoCraft 中编辑 PSD，保存后自动更新回原图层。保留图层位置、大小、旋转和填充裁切设置。\n\n适用于 Apple Silicon Mac，需要另行安装免费的本机桥接组件，并已安装 PhotoCraft。运行期间请保持插件开启。图片和 PSD 通过本机连接处理，桥接不上传图片到外部编辑服务。\n\nThis independent integration requires PhotoCraft and a free local companion for Apple Silicon macOS. Select one visible image fill, edit the opened PSD in PhotoCraft, and save to sync the composite back to the original Figma layer. Keep the plugin running while receiving edits.\n\nSource code and the companion are free under the MIT license. PhotoCraft is a separately distributed product with its own license. This is an independent integration, not an official Figma or PhotoCraft release.",
+  "support_url": "https://github.com/toufayehehua/photocraft-bridge/issues",
+  "source_url": "https://github.com/toufayehehua/photocraft-bridge",
+  "privacy_url": "https://github.com/toufayehehua/photocraft-bridge/blob/main/PRIVACY.md",
+  "download_url": "https://github.com/toufayehehua/photocraft-bridge/releases",
+  "review_notes": "The companion runs only on loopback, creates/reads local PSD files, and launches PhotoCraft. All Figma document changes use the official Plugin API. The companion does not inject into, modify, or automate Figma Web/Desktop. Local HTTP uses a per-installation pairing token. No analytics or remote image processing are implemented. The public plugin does not use private Figma APIs."
+}
