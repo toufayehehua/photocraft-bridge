@@ -8,7 +8,7 @@ PhotoCraft Bridge is an independent integration. PhotoCraft, Figma, and Adobe XD
 
 | Host | Distribution | Requirements |
 | --- | --- | --- |
-| Figma Design desktop | Community submission and standalone development package | Apple Silicon Mac; macOS 11 or later; PhotoCraft installed |
+| Figma Design desktop | Submitted for Community review ([pending, not public yet](https://www.figma.com/community/plugin/1695793882852666354)); standalone development package | Apple Silicon Mac; macOS 11 or later; PhotoCraft installed |
 | Adobe XD | Standalone `.xdx` and companion installer | Apple Silicon Mac; macOS 26 or later; XD 36 or later; PhotoCraft installed |
 
 Adobe no longer accepts new XD Marketplace plugins. Existing Marketplace listings can still be updated. The XD version is distributed through GitHub Releases. [Adobe distribution notice](https://developer.adobe.com/xd/uxp/distribution/)
