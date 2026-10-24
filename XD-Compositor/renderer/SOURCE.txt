@@ -1,0 +1,8 @@
+Compositor v1.4.8
+https://github.com/robbietilton/Compositor
+Commit: 24ef2885daae750537ec8d094f33e8556a8dfc9a
+MIT; license in vendor/LICENSE.
+The headless build selects original rendering declarations and their C dependencies.
+EditorSession extensions, application windows, updater and editing UI are excluded.
+Upstream source files are retained without code changes.
+Project formats 1 through 11 are supported by this pinned renderer.
