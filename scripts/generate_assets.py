@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render the project's own vector-style store artwork with Pillow."""
+"""Render store covers using the project's icon."""
 from pathlib import Path
-from PIL import Image, ImageDraw, ImageFont, ImageOps
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "assets"
@@ -20,22 +20,10 @@ def font(size, bold=False):
 
 
 def icon(size):
-    scale = 4
-    canvas = Image.new("RGBA", (size * scale, size * scale))
-    d = ImageDraw.Draw(canvas)
-    def rect(box, radius, fill, outline=None, width=1):
-        d.rounded_rectangle(tuple(int(x * size * scale) for x in box), radius=int(radius * size * scale),
-                            fill=fill, outline=outline, width=max(1, int(width * size * scale)))
-    rect((0, 0, 1, 1), .23, "#6558ef")
-    rect((.16, .22, .65, .67), .06, "#b8adff")
-    rect((.35, .36, .84, .81), .06, "#ffffff")
-    d.line([(int(x * size * scale), int(y * size * scale)) for x, y in
-            [(.44, .62), (.53, .53), (.64, .64), (.74, .53)]], fill="#6558ef", width=int(.035 * size * scale), joint="curve")
-    return canvas.resize((size, size), Image.Resampling.LANCZOS)
+    with Image.open(OUT / "icon-512.png") as source:
+        return source.convert("RGBA").resize((size, size), Image.Resampling.LANCZOS)
 
 
-icon(128).save(OUT / "icon-128.png")
-icon(512).save(OUT / "icon-512.png")
 cover = Image.new("RGB", (1920, 1080), "#111528")
 d = ImageDraw.Draw(cover)
 d.rounded_rectangle((1120, 92, 1808, 988), 60, fill="#1c2240")
