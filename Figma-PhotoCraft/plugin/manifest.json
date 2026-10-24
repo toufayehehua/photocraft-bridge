@@ -1,0 +1,23 @@
+{
+  "name": "在 PhotoCraft 中编辑",
+  "id": "1695793882852666354",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": [
+    "figma"
+  ],
+  "documentAccess": "dynamic-page",
+  "relaunchButtons": [
+    {
+      "command": "edit",
+      "name": "在 PhotoCraft 中编辑"
+    }
+  ],
+  "networkAccess": {
+    "allowedDomains": [
+      "http://localhost:47836"
+    ],
+    "reasoning": "通过本机桥接在 PhotoCraft 中编辑图片并同步回 Figma。"
+  }
+}
