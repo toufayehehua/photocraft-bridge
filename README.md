@@ -1,59 +1,48 @@
 # PhotoCraft Bridge
 
-Free, open-source plugins for editing Adobe XD and Figma image fills in PhotoCraft and syncing saved changes back to the original layer.
+在 XD 或 Figma 中选中图片，发送到 PhotoCraft 编辑，保存后更新回原图层。
 
-PhotoCraft Bridge is an independent integration. PhotoCraft, Figma, and Adobe XD are separate products; this repository does not distribute their applications or licenses.
+不用手动导出再放回设计稿，原图层的位置、大小和旋转角度保持不变。
 
-## Platforms
+## 使用要求
 
-| Host | Distribution | Requirements |
-| --- | --- | --- |
-| Figma Design desktop | Submitted for Community review ([pending, not public yet](https://www.figma.com/community/plugin/1695793882852666354)); standalone development package | Apple Silicon Mac; macOS 11 or later; PhotoCraft installed |
-| Adobe XD | Standalone `.xdx` and companion installer | Apple Silicon Mac; macOS 26 or later; XD 36 or later; PhotoCraft installed |
+仅支持 Apple 芯片的 Mac，需要先安装 PhotoCraft 和对应的设计软件。
 
-Adobe no longer accepts new XD Marketplace plugins. Existing Marketplace listings can still be updated. The XD version is distributed through GitHub Releases. [Adobe distribution notice](https://developer.adobe.com/xd/uxp/distribution/)
+| 设计软件 | 系统要求 |
+| --- | --- |
+| Figma 桌面版 | macOS 11 或更高版本 |
+| Adobe XD 36 或更高版本 | macOS 26 或更高版本 |
 
-## Use
+## 安装
 
-1. Install the companion for your host application from a release package.
-2. Install the Figma plugin or the XD `.xdx` package. The source builds also include development manifests.
-3. Select a layer with one visible image fill, then run **在 PhotoCraft 中编辑** (Edit in PhotoCraft).
-4. On first use, connect the plugin with the pairing code shown by the companion installer.
-5. Edit the opened PSD in PhotoCraft and save with **Command+S**. The saved composite replaces the original layer's image fill.
+1. 在[下载页面](https://github.com/toufayehehua/photocraft-bridge/releases)下载对应的 Figma 或 XD 安装包及插件包。
+2. 解压安装包，打开 **Figma PhotoCraft Setup.app** 或 **XD PhotoCraft Setup.app**，安装后复制显示的配对码。
+3. 安装插件：
+   - **Figma**：解压插件包，在 Figma 中选择 **Plugins → Development → Import plugin from manifest**，打开其中的 `manifest.json`。
+   - **XD**：打开下载的 `.xdx` 文件安装插件。如果 XD 已打开，重启或重新加载插件。
+4. XD 用户还需在 **系统设置 → 隐私与安全 → 辅助功能**中允许 **XD Compositor Bridge**。Figma 不需要这项授权。
 
-Figma's plugin must remain running while receiving changes. Figma closes a running plugin when another plugin starts in that file. Re-run the editor command to establish a new editing association after closing it. Public plugins do not depend on Figma's private APIs.
+## 使用
 
-XD's companion needs macOS Accessibility access to invoke the plugin's update command. The default installer does not change XD application resources or add an item to its native Photoshop menu.
+1. 在 XD 或 Figma 中选中一个图片图层。组里的图片要进入组，选中图片本身；一个图层只能有一个可见的图片填充。
+2. 运行 **在 PhotoCraft 中编辑**。首次使用时粘贴配对码并连接。
+3. 在 PhotoCraft 中编辑打开的图片，按 **Command + S** 保存，结果会更新回原图层。
 
-Layer position, dimensions, and rotation are retained. Figma retains image-fill settings; XD retains the fill's scaling behavior, but an adjusted internal crop may need to be restored manually. Replacing the source image, deleting its layer, or undoing a returned image ends the association to avoid overwriting later work. Save the opened PSD directly; a different Save As path is not watched.
+## 注意事项
 
-## Limits
+- 每次选择一个图片图层，支持 PNG、JPEG 和 GIF；GIF 按静态图片处理。
+- 在 PhotoCraft 中添加的图层、蒙版和效果会合成一张图片放回设计稿，不会变成 XD 或 Figma 的多个图层。
+- 直接保存此次打开的 PSD 文件，保持 PhotoCraft 的“最大化 PSD 兼容性”开启；“另存为”的新文件不会更新原图层。
+- 使用 Figma 时，保持设计文件打开、插件运行。关闭插件或运行其他插件后，需要重新选图并运行本插件。
+- 使用 XD 时，保持文档打开。保存后可能短暂切换到 XD，再返回之前的应用；手动调整过的图片内部裁切位置可能需要重新调整。
+- 在设计稿中替换图片、删除图层或撤销更新后，需要重新选图并运行插件，才能继续更新。
 
-- PNG, JPEG, and GIF input. GIF is treated as a static image.
-- PhotoCraft must save a compatible RGB 8-bit or 16-bit PSD composite. Keep its maximum PSD compatibility setting enabled.
-- Raw, RLE, ZIP, and ZIP-predicted PSD composites are supported. PSB, 32-bit, non-RGB, and missing composites are rejected.
-- Figma image API limits continue to apply. The companion rejects input files over 64 MiB.
-- The Figma public build isolates editing jobs by plugin run. Closing the file or plugin stops updates to that document; the local PSD remains available.
-- The XD optional native-menu patch under `XD-Compositor/context-menu` is version-specific developer tooling. It is not applied by the release installers and is not included in the plugin store package.
+## 隐私与开源
 
-## Data and permissions
+图片在本机处理，插件不会把图片上传到远程编辑服务；Figma 和 XD 自身的文档同步仍按各自设置运行。工作图片和 PSD 会留在电脑上，需要时自行删除。不要公开配对码。
 
-Images and PSD working files are processed locally. The companions listen only on the loopback interface and require a random, per-installation token. Public plugin packages contain no installation tokens. Figma stores its pairing token in local `clientStorage`; XD stores it in its plugin data folder.
+查看[隐私说明](PRIVACY.md)、[MIT 许可证](LICENSE)和[第三方声明](THIRD_PARTY_NOTICES.md)。遇到问题可在 [Issues](https://github.com/toufayehehua/photocraft-bridge/issues) 反馈。
 
-Working PSDs are retained until the user deletes them. See [Privacy](PRIVACY.md) for paths, data handling, and deletion instructions.
+## 开发
 
-## Build from source
-
-The build machine needs Python 3 and Xcode command-line tools. Release installers contain compiled companions, so end users do not need a compiler.
-
-```sh
-python3 scripts/build_release.py
-```
-
-The shared PSD implementation is in `shared/PSD.swift`. The XD legacy Compositor renderer includes pinned MIT-licensed upstream code; its source and attribution are retained in `XD-Compositor/renderer`.
-
-## License and support
-
-The integration code is available under the [MIT license](LICENSE). Third-party notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). This MIT license also applies when the plugin is distributed for free through Figma Community.
-
-Use this repository's Issues page for support. Do not attach pairing codes, authentication tokens, private documents, or images you do not intend to make public.
+从源码构建需要 Python 3 和 Xcode 命令行工具，运行 `python3 scripts/build_release.py`。直接使用安装包无需这些工具。
