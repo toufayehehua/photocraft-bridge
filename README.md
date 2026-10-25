@@ -41,7 +41,7 @@
 
 图片在本机处理，插件不会把图片上传到远程编辑服务；Figma 和 XD 自身的文档同步仍按各自设置运行。工作图片和 PSD 会留在电脑上，需要时自行删除。不要公开配对码。
 
-查看[隐私说明](PRIVACY.md)、[MIT 许可证](LICENSE)和[第三方声明](THIRD_PARTY_NOTICES.md)。遇到问题可在 [Issues](https://github.com/toufayehehua/photocraft-bridge/issues) 反馈。
+查看[隐私说明](PRIVACY.md)、[Apache 2.0 许可证](LICENSE)和[第三方声明](THIRD_PARTY_NOTICES.md)。遇到问题可在 [Issues](https://github.com/toufayehehua/photocraft-bridge/issues) 反馈。
 
 ## 开发
 
