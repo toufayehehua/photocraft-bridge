@@ -50,7 +50,7 @@ def validate_sources(development=False):
                 raise ValueError("Set the public companion download link before a release build")
         elif manifest.get("id") != "CmptXd01" or manifest.get("version") != info["version"]:
             raise ValueError("Unexpected XD plugin identity or release version")
-    for name in ("shared/PSD.swift", "installer/Setup.swift", "LICENSE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md"):
+    for name in ("shared/PSD.swift", "installer/Setup.swift", "LICENSE", "NOTICE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md"):
         if not (ROOT / name).is_file():
             raise ValueError("Missing release source: " + name)
 
@@ -109,7 +109,7 @@ def build_helper(host, directory, identity, icon=None):
         shutil.copy2(icon, resources / icon.name)
         metadata["CFBundleIconFile"] = icon.name
     write_info(app, metadata)
-    for name in ("LICENSE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md"):
+    for name in ("LICENSE", "NOTICE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md"):
         shutil.copy2(ROOT / name, resources / name)
     run(["xcrun", "swiftc", "-O", "-target", "arm64-apple-macos" + info["minimum"],
          source / "bridge/main.swift", ROOT / "shared/PSD.swift", "-o", macos / info["executable"]])
@@ -135,7 +135,7 @@ def build_setup(host, directory, helper, setup_binary, identity, icon=None):
     plugin.mkdir()
     for name in info["plugin"]:
         shutil.copy2(ROOT / info["source"] / "plugin" / name, plugin / name)
-    for name in ("LICENSE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md", "README.md"):
+    for name in ("LICENSE", "NOTICE", "PRIVACY.md", "THIRD_PARTY_NOTICES.md", "README.md"):
         shutil.copy2(ROOT / name, resources / name)
     metadata = {"CFBundleIdentifier": "local.photocraft.setup." + host,
                      "CFBundleName": app.stem, "CFBundleExecutable": "PhotoCraftSetup", "CFBundlePackageType": "APPL",
@@ -160,9 +160,10 @@ def package_plugin(host, output):
     with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
         for name in info["plugin"]:
             archive.write(ROOT / info["source"] / "plugin" / name, name)
-        archive.write(ROOT / "LICENSE", "LICENSE")
+        for name in ("LICENSE", "NOTICE"):
+            archive.write(ROOT / name, name)
     with zipfile.ZipFile(output) as archive:
-        expected = set(info["plugin"]) | {"LICENSE"}
+        expected = set(info["plugin"]) | {"LICENSE", "NOTICE"}
         if set(archive.namelist()) != expected or archive.testzip() is not None:
             raise ValueError("Plugin archive verification failed")
 
